@@ -1,5 +1,5 @@
 name: health_care_chatbot
-description: "A new Flutter project."
+description: "A healthcare chatbot using Gemini AI."
 publish_to: 'none'
 version: 0.1.0
 
@@ -9,6 +9,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # State Management
+  flutter_riverpod: ^2.4.9
+  
+  # Gemini AI
+  google_generative_ai: ^0.2.2
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  
+  # UI Enhancements
+  flutter_chat_ui: ^1.6.10
+  flutter_chat_types: ^3.6.2
+  
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.3.3
+  # Load environment variables
+  flutter_dotenv: ^5.2.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +35,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+assets:
+  - .env
