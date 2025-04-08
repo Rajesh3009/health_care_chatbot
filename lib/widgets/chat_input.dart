@@ -4,7 +4,7 @@ import '../utils/constants.dart';
 class ChatInput extends StatefulWidget {
   final Function(String) onSend;
   
-  const ChatInput({Key? key, required this.onSend}) : super(key: key);
+  const ChatInput({super.key, required this.onSend});
   
   @override
   _ChatInputState createState() => _ChatInputState();

@@ -25,8 +25,7 @@ dependencies:
   # Utilities
   intl: ^0.19.0
   uuid: ^4.3.3
-  # Load environment variables
-  flutter_dotenv: ^5.2.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

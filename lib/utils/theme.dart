@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 
 class ThemeColors {
   static const Color primaryGreen = Color(0xFF4CAF50);
@@ -63,11 +62,11 @@ ThemeData getAppTheme({bool isDarkMode = false}) {
       ),
     ),
     textTheme: TextTheme(
-      bodyLarge: TextStyle(
-        color: isDarkMode ? Colors.white : Colors.black,
+      bodyLarge: const TextStyle(
+        color: Colors.black,
       ),
-      bodyMedium: TextStyle(
-        color: isDarkMode ? Colors.white : Colors.black,
+      bodyMedium: const TextStyle(
+        color: Colors.black,
       ),
     ),
   );

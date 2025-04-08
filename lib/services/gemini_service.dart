@@ -1,5 +1,4 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/api.dart';
 import '../utils/constants.dart';
 
@@ -14,7 +13,7 @@ class GeminiService {
   
   Future<String> getHealthResponse(String prompt) async {
     // Add healthcare context to the prompt
-    final enhancedPrompt = 'As a healthcare assistant, please provide accurate information about: $prompt';
+    final enhancedPrompt = 'As a healthcare assistant, please provide accurate information about: $prompt and include some references.';
     
     try {
       final response = await _generativeModel.generateContent([
