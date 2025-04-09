@@ -11,6 +11,9 @@ final geminiServiceProvider = Provider<GeminiService>((ref) {
   return GeminiService();
 });
 
+// Provider for loading state
+final isLoadingProvider = StateProvider<bool>((ref) => false);
+
 // Provider for the chat messages
 final chatProvider = StateNotifierProvider<ChatNotifier, List<Message>>((ref) {
   return ChatNotifier(ref);
@@ -45,30 +48,38 @@ class ChatNotifier extends StateNotifier<List<Message>> {
 
     state = [...state, userMessage];
 
-    // Get response from Gemini
-    final geminiService = ref.read(geminiServiceProvider);
-    final response = await geminiService.getHealthResponse(content);
+    // Set loading state to true
+    ref.read(isLoadingProvider.notifier).state = true;
 
-    // Add assistant message
-    final assistantMessage = Message(
-      id: uuid.v4(),
-      content: response,
-      role: MessageRole.assistant,
-      timestamp: DateTime.now(),
-      conversationId: historyId,
-    );
+    try {
+      // Get response from Gemini
+      final geminiService = ref.read(geminiServiceProvider);
+      final response = await geminiService.getHealthResponse(content);
 
-    state = [...state, assistantMessage];
+      // Add assistant message
+      final assistantMessage = Message(
+        id: uuid.v4(),
+        content: response,
+        role: MessageRole.assistant,
+        timestamp: DateTime.now(),
+        conversationId: historyId,
+      );
 
-    // Save messages to database
-    await _db.saveMessage(userMessage, historyId);
-    await _db.saveMessage(assistantMessage, historyId);
+      state = [...state, assistantMessage];
 
-    // Save to history only if this is a new conversation
-    if (state.length <= 2) {
-      ref
-          .read(historyProvider.notifier)
-          .saveChat([userMessage, assistantMessage], historyId);
+      // Save messages to database
+      await _db.saveMessage(userMessage, historyId);
+      await _db.saveMessage(assistantMessage, historyId);
+
+      // Save to history only if this is a new conversation
+      if (state.length <= 2) {
+        ref
+            .read(historyProvider.notifier)
+            .saveChat([userMessage, assistantMessage], historyId);
+      }
+    } finally {
+      // Set loading state to false regardless of success or failure
+      ref.read(isLoadingProvider.notifier).state = false;
     }
   }
 

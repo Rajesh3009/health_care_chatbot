@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/chat_screen.dart';
-import 'utils/theme.dart';
+import 'providers/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  runApp(const ProviderScope(child: MainApp()));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Healthcare Chatbot',
-      theme: getAppTheme(),
-      darkTheme: getAppTheme(isDarkMode: true),
-      themeMode: ThemeMode.system, // Use system theme by default
+      theme: theme,
       home: const ChatScreen(),
     );
   }
