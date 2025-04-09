@@ -14,6 +14,9 @@ final geminiServiceProvider = Provider<GeminiService>((ref) {
 // Provider for loading state
 final isLoadingProvider = StateProvider<bool>((ref) => false);
 
+// Provider for current conversation ID
+final currentConversationIdProvider = StateProvider<String>((ref) => '');
+
 // Provider for the chat messages
 final chatProvider = StateNotifierProvider<ChatNotifier, List<Message>>((ref) {
   return ChatNotifier(ref);
@@ -28,6 +31,10 @@ class ChatNotifier extends StateNotifier<List<Message>> {
   }
 
   void loadChat(String conversationId) async {
+    // Set the current conversation ID
+    ref.read(currentConversationIdProvider.notifier).state = conversationId;
+
+    // Load messages for this conversation
     final messages = await _db.getMessagesForConversation(conversationId);
     state = messages;
   }
@@ -36,6 +43,15 @@ class ChatNotifier extends StateNotifier<List<Message>> {
     if (content.trim().isEmpty) return;
 
     var uuid = const Uuid();
+    // Use the current conversation ID if it exists, otherwise use the provided historyId
+    final conversationId = ref.read(currentConversationIdProvider) != ''
+        ? ref.read(currentConversationIdProvider)
+        : historyId;
+
+    // If this is a new conversation, set it as current
+    if (ref.read(currentConversationIdProvider) == '') {
+      ref.read(currentConversationIdProvider.notifier).state = conversationId;
+    }
 
     // Add user message
     final userMessage = Message(
@@ -43,7 +59,7 @@ class ChatNotifier extends StateNotifier<List<Message>> {
       content: content,
       role: MessageRole.user,
       timestamp: DateTime.now(),
-      conversationId: historyId,
+      conversationId: conversationId,
     );
 
     state = [...state, userMessage];
@@ -62,20 +78,20 @@ class ChatNotifier extends StateNotifier<List<Message>> {
         content: response,
         role: MessageRole.assistant,
         timestamp: DateTime.now(),
-        conversationId: historyId,
+        conversationId: conversationId,
       );
 
       state = [...state, assistantMessage];
 
       // Save messages to database
-      await _db.saveMessage(userMessage, historyId);
-      await _db.saveMessage(assistantMessage, historyId);
+      await _db.saveMessage(userMessage, conversationId);
+      await _db.saveMessage(assistantMessage, conversationId);
 
       // Save to history only if this is a new conversation
       if (state.length <= 2) {
         ref
             .read(historyProvider.notifier)
-            .saveChat([userMessage, assistantMessage], historyId);
+            .saveChat([userMessage, assistantMessage], conversationId);
       }
     } finally {
       // Set loading state to false regardless of success or failure
@@ -90,7 +106,8 @@ class ChatNotifier extends StateNotifier<List<Message>> {
     // Delete history entry
     await ref.read(historyProvider.notifier).deleteHistoryEntry(conversationId);
 
-    // Clear current chat state
+    // Clear current chat state and conversation ID
     state = [];
+    ref.read(currentConversationIdProvider.notifier).state = '';
   }
 }

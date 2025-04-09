@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/message.dart';
+import '../utils/theme.dart';
 
 class ChatBubble extends StatelessWidget {
   final Message message;
@@ -11,13 +12,9 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
-    final backgroundColor = isUser
-        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-        : Theme.of(context).colorScheme.secondary.withOpacity(0.1);
+    final backgroundColor = isUser ? ThemeColors.userBubbleColor : Colors.white;
 
-    final textColor = isUser
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.secondary;
+    final textColor = isUser ? ThemeColors.darkGreen : Colors.black87;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -32,11 +29,17 @@ class ChatBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
+          border: !isUser
+              ? Border.all(color: ThemeColors.primaryGreen.withOpacity(0.3))
+              : null,
         ),
         child: isUser
             ? Text(
                 message.content,
-                style: TextStyle(color: textColor),
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w500,
+                ),
               )
             : MarkdownBody(
                 data: message.content,
@@ -46,13 +49,13 @@ class ChatBubble extends StatelessWidget {
                         color: textColor,
                       ),
                   code: TextStyle(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    backgroundColor: ThemeColors.lightGreen.withOpacity(0.3),
                     fontFamily: 'monospace',
                     fontSize: 14,
-                    color: textColor,
+                    color: ThemeColors.darkGreen,
                   ),
                   codeblockDecoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
+                    color: ThemeColors.lightGreen.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
