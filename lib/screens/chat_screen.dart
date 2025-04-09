@@ -3,16 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input.dart';
-import 'history_screen.dart';
 import '../utils/theme.dart';
-import '../utils/constants.dart';
+import '../providers/history_provider.dart'; // Import history provider
+import '../widgets/history_item.dart'; // Import history item
+import '../models/message.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatScreen extends ConsumerWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatProvider);
+    final history = ref.watch(historyProvider); // Watch history provider
 
     return Scaffold(
       appBar: AppBar(
@@ -20,44 +23,20 @@ class ChatScreen extends ConsumerWidget {
         backgroundColor: ThemeColors.primaryGreen,
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_forever),
+            icon: const Icon(Icons.add),
             onPressed: () {
-              ref.read(chatProvider.notifier).clearChat();
+              var uuid = const Uuid();
+              final newHistoryId = uuid.v4();
+              ref.read(chatProvider.notifier).loadChat(newHistoryId);
             },
           ),
         ],
       ),
       drawer: Drawer(
         child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: ThemeColors.primaryGreen,
-              ),
-              child: const Text(
-                AppConstants.historyTitle,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ExpansionTile(
-              title: const Text('Chat History'),
-              children: [
-                ListTile(
-                  title: const Text('View History'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
+          children: history
+              .map((historyItem) => HistoryItem(historyItem: historyItem))
+              .toList(),
         ),
       ),
       body: Column(
@@ -67,13 +46,17 @@ class ChatScreen extends ConsumerWidget {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
-                return ChatBubble(message: message);
+                return AnimatedOpacity(
+                  opacity: message.role == MessageRole.assistant ? 1.0 : 1.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: ChatBubble(message: message),
+                );
               },
             ),
           ),
           ChatInput(
-            onSend: (text) {
-              ref.read(chatProvider.notifier).sendMessage(text);
+            onSend: (text, historyId) {
+              ref.read(chatProvider.notifier).sendMessage(text, historyId);
             },
           ),
         ],

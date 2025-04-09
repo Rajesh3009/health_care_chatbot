@@ -1,63 +1,60 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../database/database.dart' as db;
 import '../models/message.dart';
 
-// Provider for chat history
-final historyProvider = StateNotifierProvider<HistoryNotifier, List<List<Message>>>((ref) {
-  return HistoryNotifier();
+// Provider for the database
+final databaseProvider = Provider<db.AppDatabase>((ref) {
+  return db.AppDatabase();
 });
 
-class HistoryNotifier extends StateNotifier<List<List<Message>>> {
-  HistoryNotifier() : super([]) {
+// Provider for chat history
+final historyProvider =
+    StateNotifierProvider<HistoryNotifier, List<db.ChatHistoryData>>((ref) {
+  return HistoryNotifier(ref);
+});
+
+class HistoryNotifier extends StateNotifier<List<db.ChatHistoryData>> {
+  final Ref ref;
+  late final db.AppDatabase _db;
+
+  HistoryNotifier(this.ref) : super([]) {
+    _db = ref.read(databaseProvider);
     _loadHistory();
   }
-  
+
   Future<void> _loadHistory() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final historyJson = prefs.getStringList('chat_history') ?? [];
-      
-      final loadedHistory = historyJson.map((chatJson) {
-        final List<dynamic> chatData = jsonDecode(chatJson);
-        return chatData.map((msgJson) => Message.fromJson(msgJson)).toList();
-      }).toList();
-      
-      state = loadedHistory;
-    } catch (e) {
-      // If there's an error loading history, just start with empty state
-      state = [];
-    }
+    final history = await _db.getAllChatHistory();
+    state = history;
   }
-  
-  Future<void> saveChat(List<Message> chat) async {
+
+  Future<void> saveChat(List<Message> chat, String historyId) async {
     if (chat.isEmpty) return;
-    
-    // Add to state
-    state = [...state, chat];
-    
-    // Save to SharedPreferences
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final historyJson = state.map((chat) {
-        final chatJson = chat.map((msg) => msg.toJson()).toList();
-        return jsonEncode(chatJson);
-      }).toList();
-      
-      await prefs.setStringList('chat_history', historyJson);
-    } catch (e) {
-      // Handle error silently
-      print('Error saving chat history: $e');
-    }
+
+    final firstMessage = chat.first;
+
+    // Save to database
+    await _db.saveChatHistory(
+      db.ChatHistoryCompanion.insert(
+        id: historyId,
+        firstMessage: firstMessage.content,
+      ),
+    );
+
+    // Update state
+    final newHistory = await _db.getAllChatHistory();
+    state = newHistory;
   }
-  
+
   Future<void> clearHistory() async {
+    await _db.clearChatHistory();
     state = [];
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('chat_history');
-    } catch (e) {
-      print('Error clearing chat history: $e');
-    }
+  }
+
+  Future<void> deleteHistoryEntry(String historyId) async {
+    // Delete from database
+    await _db.deleteHistoryEntry(historyId);
+
+    // Update state by removing the entry
+    state = state.where((entry) => entry.id != historyId).toList();
   }
 }

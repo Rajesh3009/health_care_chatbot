@@ -7,30 +7,32 @@ class Message {
   final String content;
   final MessageRole role;
   final DateTime timestamp;
-  
+  final String conversationId;
+
   Message({
-    String? id,
+    required this.id,
     required this.content,
     required this.role,
-    DateTime? timestamp,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    timestamp = timestamp ?? DateTime.now();
-  
+    required this.timestamp,
+    this.conversationId = '',
+  });
+
   // Conversion methods for storage
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'content': content,
-    'role': role.toString(),
-    'timestamp': timestamp.toIso8601String(),
-  };
-  
+        'id': id,
+        'content': content,
+        'role': role.toString(),
+        'timestamp': timestamp.toIso8601String(),
+        'conversationId': conversationId,
+      };
+
   factory Message.fromJson(Map<String, dynamic> json) => Message(
-    id: json['id'],
-    content: json['content'],
-    role: json['role'] == 'MessageRole.assistant' 
-        ? MessageRole.assistant 
-        : MessageRole.user,
-    timestamp: DateTime.parse(json['timestamp']),
-  );
+        id: json['id'],
+        content: json['content'],
+        role: json['role'] == 'MessageRole.assistant'
+            ? MessageRole.assistant
+            : MessageRole.user,
+        timestamp: DateTime.parse(json['timestamp']),
+        conversationId: json['conversationId'] ?? '',
+      );
 }
