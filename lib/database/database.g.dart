@@ -512,16 +512,404 @@ class ChatHistoryCompanion extends UpdateCompanion<ChatHistoryData> {
   }
 }
 
+class $RemindersTable extends Reminders
+    with TableInfo<$RemindersTable, ReminderData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RemindersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _medicationNameMeta =
+      const VerificationMeta('medicationName');
+  @override
+  late final GeneratedColumn<String> medicationName = GeneratedColumn<String>(
+      'medication_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+      'quantity', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _hourMeta = const VerificationMeta('hour');
+  @override
+  late final GeneratedColumn<int> hour = GeneratedColumn<int>(
+      'hour', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _minuteMeta = const VerificationMeta('minute');
+  @override
+  late final GeneratedColumn<int> minute = GeneratedColumn<int>(
+      'minute', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _daysMeta = const VerificationMeta('days');
+  @override
+  late final GeneratedColumn<String> days = GeneratedColumn<String>(
+      'days', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isActiveMeta =
+      const VerificationMeta('isActive');
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+      'is_active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_active" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, medicationName, quantity, hour, minute, days, isActive];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reminders';
+  @override
+  VerificationContext validateIntegrity(Insertable<ReminderData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('medication_name')) {
+      context.handle(
+          _medicationNameMeta,
+          medicationName.isAcceptableOrUnknown(
+              data['medication_name']!, _medicationNameMeta));
+    } else if (isInserting) {
+      context.missing(_medicationNameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('hour')) {
+      context.handle(
+          _hourMeta, hour.isAcceptableOrUnknown(data['hour']!, _hourMeta));
+    } else if (isInserting) {
+      context.missing(_hourMeta);
+    }
+    if (data.containsKey('minute')) {
+      context.handle(_minuteMeta,
+          minute.isAcceptableOrUnknown(data['minute']!, _minuteMeta));
+    } else if (isInserting) {
+      context.missing(_minuteMeta);
+    }
+    if (data.containsKey('days')) {
+      context.handle(
+          _daysMeta, days.isAcceptableOrUnknown(data['days']!, _daysMeta));
+    } else if (isInserting) {
+      context.missing(_daysMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(_isActiveMeta,
+          isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReminderData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReminderData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      medicationName: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}medication_name'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}quantity'])!,
+      hour: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}hour'])!,
+      minute: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}minute'])!,
+      days: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}days'])!,
+      isActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_active'])!,
+    );
+  }
+
+  @override
+  $RemindersTable createAlias(String alias) {
+    return $RemindersTable(attachedDatabase, alias);
+  }
+}
+
+class ReminderData extends DataClass implements Insertable<ReminderData> {
+  final String id;
+  final String medicationName;
+  final int quantity;
+  final int hour;
+  final int minute;
+  final String days;
+  final bool isActive;
+  const ReminderData(
+      {required this.id,
+      required this.medicationName,
+      required this.quantity,
+      required this.hour,
+      required this.minute,
+      required this.days,
+      required this.isActive});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['medication_name'] = Variable<String>(medicationName);
+    map['quantity'] = Variable<int>(quantity);
+    map['hour'] = Variable<int>(hour);
+    map['minute'] = Variable<int>(minute);
+    map['days'] = Variable<String>(days);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  RemindersCompanion toCompanion(bool nullToAbsent) {
+    return RemindersCompanion(
+      id: Value(id),
+      medicationName: Value(medicationName),
+      quantity: Value(quantity),
+      hour: Value(hour),
+      minute: Value(minute),
+      days: Value(days),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory ReminderData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReminderData(
+      id: serializer.fromJson<String>(json['id']),
+      medicationName: serializer.fromJson<String>(json['medicationName']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      hour: serializer.fromJson<int>(json['hour']),
+      minute: serializer.fromJson<int>(json['minute']),
+      days: serializer.fromJson<String>(json['days']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'medicationName': serializer.toJson<String>(medicationName),
+      'quantity': serializer.toJson<int>(quantity),
+      'hour': serializer.toJson<int>(hour),
+      'minute': serializer.toJson<int>(minute),
+      'days': serializer.toJson<String>(days),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  ReminderData copyWith(
+          {String? id,
+          String? medicationName,
+          int? quantity,
+          int? hour,
+          int? minute,
+          String? days,
+          bool? isActive}) =>
+      ReminderData(
+        id: id ?? this.id,
+        medicationName: medicationName ?? this.medicationName,
+        quantity: quantity ?? this.quantity,
+        hour: hour ?? this.hour,
+        minute: minute ?? this.minute,
+        days: days ?? this.days,
+        isActive: isActive ?? this.isActive,
+      );
+  ReminderData copyWithCompanion(RemindersCompanion data) {
+    return ReminderData(
+      id: data.id.present ? data.id.value : this.id,
+      medicationName: data.medicationName.present
+          ? data.medicationName.value
+          : this.medicationName,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      hour: data.hour.present ? data.hour.value : this.hour,
+      minute: data.minute.present ? data.minute.value : this.minute,
+      days: data.days.present ? data.days.value : this.days,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReminderData(')
+          ..write('id: $id, ')
+          ..write('medicationName: $medicationName, ')
+          ..write('quantity: $quantity, ')
+          ..write('hour: $hour, ')
+          ..write('minute: $minute, ')
+          ..write('days: $days, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, medicationName, quantity, hour, minute, days, isActive);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReminderData &&
+          other.id == this.id &&
+          other.medicationName == this.medicationName &&
+          other.quantity == this.quantity &&
+          other.hour == this.hour &&
+          other.minute == this.minute &&
+          other.days == this.days &&
+          other.isActive == this.isActive);
+}
+
+class RemindersCompanion extends UpdateCompanion<ReminderData> {
+  final Value<String> id;
+  final Value<String> medicationName;
+  final Value<int> quantity;
+  final Value<int> hour;
+  final Value<int> minute;
+  final Value<String> days;
+  final Value<bool> isActive;
+  final Value<int> rowid;
+  const RemindersCompanion({
+    this.id = const Value.absent(),
+    this.medicationName = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.hour = const Value.absent(),
+    this.minute = const Value.absent(),
+    this.days = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RemindersCompanion.insert({
+    required String id,
+    required String medicationName,
+    required int quantity,
+    required int hour,
+    required int minute,
+    required String days,
+    this.isActive = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        medicationName = Value(medicationName),
+        quantity = Value(quantity),
+        hour = Value(hour),
+        minute = Value(minute),
+        days = Value(days);
+  static Insertable<ReminderData> custom({
+    Expression<String>? id,
+    Expression<String>? medicationName,
+    Expression<int>? quantity,
+    Expression<int>? hour,
+    Expression<int>? minute,
+    Expression<String>? days,
+    Expression<bool>? isActive,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (medicationName != null) 'medication_name': medicationName,
+      if (quantity != null) 'quantity': quantity,
+      if (hour != null) 'hour': hour,
+      if (minute != null) 'minute': minute,
+      if (days != null) 'days': days,
+      if (isActive != null) 'is_active': isActive,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RemindersCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? medicationName,
+      Value<int>? quantity,
+      Value<int>? hour,
+      Value<int>? minute,
+      Value<String>? days,
+      Value<bool>? isActive,
+      Value<int>? rowid}) {
+    return RemindersCompanion(
+      id: id ?? this.id,
+      medicationName: medicationName ?? this.medicationName,
+      quantity: quantity ?? this.quantity,
+      hour: hour ?? this.hour,
+      minute: minute ?? this.minute,
+      days: days ?? this.days,
+      isActive: isActive ?? this.isActive,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (medicationName.present) {
+      map['medication_name'] = Variable<String>(medicationName.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (hour.present) {
+      map['hour'] = Variable<int>(hour.value);
+    }
+    if (minute.present) {
+      map['minute'] = Variable<int>(minute.value);
+    }
+    if (days.present) {
+      map['days'] = Variable<String>(days.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RemindersCompanion(')
+          ..write('id: $id, ')
+          ..write('medicationName: $medicationName, ')
+          ..write('quantity: $quantity, ')
+          ..write('hour: $hour, ')
+          ..write('minute: $minute, ')
+          ..write('days: $days, ')
+          ..write('isActive: $isActive, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $MessagesTable messages = $MessagesTable(this);
   late final $ChatHistoryTable chatHistory = $ChatHistoryTable(this);
+  late final $RemindersTable reminders = $RemindersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [messages, chatHistory];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [messages, chatHistory, reminders];
 }
 
 typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
@@ -822,6 +1210,209 @@ typedef $$ChatHistoryTableProcessedTableManager = ProcessedTableManager<
     ),
     ChatHistoryData,
     PrefetchHooks Function()>;
+typedef $$RemindersTableCreateCompanionBuilder = RemindersCompanion Function({
+  required String id,
+  required String medicationName,
+  required int quantity,
+  required int hour,
+  required int minute,
+  required String days,
+  Value<bool> isActive,
+  Value<int> rowid,
+});
+typedef $$RemindersTableUpdateCompanionBuilder = RemindersCompanion Function({
+  Value<String> id,
+  Value<String> medicationName,
+  Value<int> quantity,
+  Value<int> hour,
+  Value<int> minute,
+  Value<String> days,
+  Value<bool> isActive,
+  Value<int> rowid,
+});
+
+class $$RemindersTableFilterComposer
+    extends Composer<_$AppDatabase, $RemindersTable> {
+  $$RemindersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get medicationName => $composableBuilder(
+      column: $table.medicationName,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get hour => $composableBuilder(
+      column: $table.hour, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get minute => $composableBuilder(
+      column: $table.minute, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get days => $composableBuilder(
+      column: $table.days, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnFilters(column));
+}
+
+class $$RemindersTableOrderingComposer
+    extends Composer<_$AppDatabase, $RemindersTable> {
+  $$RemindersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get medicationName => $composableBuilder(
+      column: $table.medicationName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get hour => $composableBuilder(
+      column: $table.hour, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get minute => $composableBuilder(
+      column: $table.minute, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get days => $composableBuilder(
+      column: $table.days, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RemindersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RemindersTable> {
+  $$RemindersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get medicationName => $composableBuilder(
+      column: $table.medicationName, builder: (column) => column);
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<int> get hour =>
+      $composableBuilder(column: $table.hour, builder: (column) => column);
+
+  GeneratedColumn<int> get minute =>
+      $composableBuilder(column: $table.minute, builder: (column) => column);
+
+  GeneratedColumn<String> get days =>
+      $composableBuilder(column: $table.days, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+}
+
+class $$RemindersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RemindersTable,
+    ReminderData,
+    $$RemindersTableFilterComposer,
+    $$RemindersTableOrderingComposer,
+    $$RemindersTableAnnotationComposer,
+    $$RemindersTableCreateCompanionBuilder,
+    $$RemindersTableUpdateCompanionBuilder,
+    (
+      ReminderData,
+      BaseReferences<_$AppDatabase, $RemindersTable, ReminderData>
+    ),
+    ReminderData,
+    PrefetchHooks Function()> {
+  $$RemindersTableTableManager(_$AppDatabase db, $RemindersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RemindersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RemindersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RemindersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> medicationName = const Value.absent(),
+            Value<int> quantity = const Value.absent(),
+            Value<int> hour = const Value.absent(),
+            Value<int> minute = const Value.absent(),
+            Value<String> days = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RemindersCompanion(
+            id: id,
+            medicationName: medicationName,
+            quantity: quantity,
+            hour: hour,
+            minute: minute,
+            days: days,
+            isActive: isActive,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String medicationName,
+            required int quantity,
+            required int hour,
+            required int minute,
+            required String days,
+            Value<bool> isActive = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RemindersCompanion.insert(
+            id: id,
+            medicationName: medicationName,
+            quantity: quantity,
+            hour: hour,
+            minute: minute,
+            days: days,
+            isActive: isActive,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RemindersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RemindersTable,
+    ReminderData,
+    $$RemindersTableFilterComposer,
+    $$RemindersTableOrderingComposer,
+    $$RemindersTableAnnotationComposer,
+    $$RemindersTableCreateCompanionBuilder,
+    $$RemindersTableUpdateCompanionBuilder,
+    (
+      ReminderData,
+      BaseReferences<_$AppDatabase, $RemindersTable, ReminderData>
+    ),
+    ReminderData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -830,4 +1421,6 @@ class $AppDatabaseManager {
       $$MessagesTableTableManager(_db, _db.messages);
   $$ChatHistoryTableTableManager get chatHistory =>
       $$ChatHistoryTableTableManager(_db, _db.chatHistory);
+  $$RemindersTableTableManager get reminders =>
+      $$RemindersTableTableManager(_db, _db.reminders);
 }
