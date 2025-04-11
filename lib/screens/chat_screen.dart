@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_bubble.dart';
-import '../widgets/chat_input.dart';
-import '../utils/theme.dart';
 import '../providers/history_provider.dart'; // Import history provider
 import '../widgets/history_item.dart'; // Import history item
 import '../models/message.dart';
@@ -44,11 +42,31 @@ class ChatScreen extends ConsumerWidget {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: history
-              .map((historyItem) => HistoryItem(historyItem: historyItem))
-              .toList(),
+      drawer: SafeArea(
+        child: Drawer(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "History",
+                  style: TextStyle(
+                    fontSize: 24,
+                    
+                  ),
+                ),
+              ),
+              Divider(),
+              Expanded(
+                child: ListView(
+                  children: history
+                      .map((historyItem) =>
+                          HistoryItem(historyItem: historyItem))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: Column(

@@ -8,10 +8,10 @@ class ChatInput extends StatefulWidget {
   const ChatInput({super.key, required this.onSend});
 
   @override
-  _ChatInputState createState() => _ChatInputState();
+  ChatInputState createState() => ChatInputState();
 }
 
-class _ChatInputState extends State<ChatInput> {
+class ChatInputState extends State<ChatInput> {
   final TextEditingController _textController = TextEditingController();
   late String _historyId;
 

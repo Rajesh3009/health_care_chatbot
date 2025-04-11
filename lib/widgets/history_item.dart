@@ -6,7 +6,7 @@ import '../database/database.dart';
 class HistoryItem extends ConsumerWidget {
   final ChatHistoryData historyItem;
 
-  const HistoryItem({Key? key, required this.historyItem}) : super(key: key);
+  const HistoryItem({super.key, required this.historyItem});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

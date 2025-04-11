@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database.dart' as db;
 import '../models/message.dart';
 import '../services/gemini_service.dart';
-import '../utils/constants.dart';
 import 'history_provider.dart';
 import 'package:uuid/uuid.dart';
 
