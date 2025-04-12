@@ -8,6 +8,10 @@ class HistoryItem extends ConsumerWidget {
 
   const HistoryItem({super.key, required this.historyItem});
 
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year.toString().substring(2)}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
@@ -17,6 +21,12 @@ class HistoryItem extends ConsumerWidget {
           historyItem.firstMessage,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          _formatDate(historyItem.timestamp),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
+              ),
         ),
         onTap: () {
           ref.read(chatProvider.notifier).loadChat(historyItem.id);

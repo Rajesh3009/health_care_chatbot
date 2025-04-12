@@ -20,9 +20,11 @@ class Messages extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('ChatHistoryData')
 class ChatHistory extends Table {
   TextColumn get id => text()();
   TextColumn get firstMessage => text()();
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -47,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +59,19 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await m.createTable(reminders);
+          }
+          if (from < 3) {
+            // Create a new table with the timestamp column
+            await m.createTable(chatHistory);
+
+            // Copy data from old table to new table
+            await customStatement(
+              'INSERT INTO chat_history (id, first_message, timestamp) '
+              'SELECT id, first_message, datetime("now") FROM old_chat_history',
+            );
+
+            // Drop the old table
+            await customStatement('DROP TABLE old_chat_history');
           }
         },
       );

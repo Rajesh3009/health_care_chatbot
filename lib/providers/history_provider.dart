@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../models/message.dart';
 import 'database_provider.dart';
@@ -33,6 +34,7 @@ class HistoryNotifier extends StateNotifier<List<ChatHistoryData>> {
       ChatHistoryCompanion.insert(
         id: historyId,
         firstMessage: firstMessage.content,
+        timestamp: Value(DateTime.now()),
       ),
     );
 

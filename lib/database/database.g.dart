@@ -334,8 +334,16 @@ class $ChatHistoryTable extends ChatHistory
   late final GeneratedColumn<String> firstMessage = GeneratedColumn<String>(
       'first_message', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
   @override
-  List<GeneratedColumn> get $columns => [id, firstMessage];
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, firstMessage, timestamp];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -359,6 +367,10 @@ class $ChatHistoryTable extends ChatHistory
     } else if (isInserting) {
       context.missing(_firstMessageMeta);
     }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    }
     return context;
   }
 
@@ -372,6 +384,8 @@ class $ChatHistoryTable extends ChatHistory
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       firstMessage: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}first_message'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
     );
   }
 
@@ -384,12 +398,15 @@ class $ChatHistoryTable extends ChatHistory
 class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
   final String id;
   final String firstMessage;
-  const ChatHistoryData({required this.id, required this.firstMessage});
+  final DateTime timestamp;
+  const ChatHistoryData(
+      {required this.id, required this.firstMessage, required this.timestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['first_message'] = Variable<String>(firstMessage);
+    map['timestamp'] = Variable<DateTime>(timestamp);
     return map;
   }
 
@@ -397,6 +414,7 @@ class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
     return ChatHistoryCompanion(
       id: Value(id),
       firstMessage: Value(firstMessage),
+      timestamp: Value(timestamp),
     );
   }
 
@@ -406,6 +424,7 @@ class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
     return ChatHistoryData(
       id: serializer.fromJson<String>(json['id']),
       firstMessage: serializer.fromJson<String>(json['firstMessage']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
     );
   }
   @override
@@ -414,13 +433,16 @@ class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'firstMessage': serializer.toJson<String>(firstMessage),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
     };
   }
 
-  ChatHistoryData copyWith({String? id, String? firstMessage}) =>
+  ChatHistoryData copyWith(
+          {String? id, String? firstMessage, DateTime? timestamp}) =>
       ChatHistoryData(
         id: id ?? this.id,
         firstMessage: firstMessage ?? this.firstMessage,
+        timestamp: timestamp ?? this.timestamp,
       );
   ChatHistoryData copyWithCompanion(ChatHistoryCompanion data) {
     return ChatHistoryData(
@@ -428,6 +450,7 @@ class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
       firstMessage: data.firstMessage.present
           ? data.firstMessage.value
           : this.firstMessage,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
 
@@ -435,53 +458,64 @@ class ChatHistoryData extends DataClass implements Insertable<ChatHistoryData> {
   String toString() {
     return (StringBuffer('ChatHistoryData(')
           ..write('id: $id, ')
-          ..write('firstMessage: $firstMessage')
+          ..write('firstMessage: $firstMessage, ')
+          ..write('timestamp: $timestamp')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, firstMessage);
+  int get hashCode => Object.hash(id, firstMessage, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ChatHistoryData &&
           other.id == this.id &&
-          other.firstMessage == this.firstMessage);
+          other.firstMessage == this.firstMessage &&
+          other.timestamp == this.timestamp);
 }
 
 class ChatHistoryCompanion extends UpdateCompanion<ChatHistoryData> {
   final Value<String> id;
   final Value<String> firstMessage;
+  final Value<DateTime> timestamp;
   final Value<int> rowid;
   const ChatHistoryCompanion({
     this.id = const Value.absent(),
     this.firstMessage = const Value.absent(),
+    this.timestamp = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ChatHistoryCompanion.insert({
     required String id,
     required String firstMessage,
+    this.timestamp = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         firstMessage = Value(firstMessage);
   static Insertable<ChatHistoryData> custom({
     Expression<String>? id,
     Expression<String>? firstMessage,
+    Expression<DateTime>? timestamp,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (firstMessage != null) 'first_message': firstMessage,
+      if (timestamp != null) 'timestamp': timestamp,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   ChatHistoryCompanion copyWith(
-      {Value<String>? id, Value<String>? firstMessage, Value<int>? rowid}) {
+      {Value<String>? id,
+      Value<String>? firstMessage,
+      Value<DateTime>? timestamp,
+      Value<int>? rowid}) {
     return ChatHistoryCompanion(
       id: id ?? this.id,
       firstMessage: firstMessage ?? this.firstMessage,
+      timestamp: timestamp ?? this.timestamp,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -495,6 +529,9 @@ class ChatHistoryCompanion extends UpdateCompanion<ChatHistoryData> {
     if (firstMessage.present) {
       map['first_message'] = Variable<String>(firstMessage.value);
     }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -506,6 +543,7 @@ class ChatHistoryCompanion extends UpdateCompanion<ChatHistoryData> {
     return (StringBuffer('ChatHistoryCompanion(')
           ..write('id: $id, ')
           ..write('firstMessage: $firstMessage, ')
+          ..write('timestamp: $timestamp, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1085,12 +1123,14 @@ typedef $$ChatHistoryTableCreateCompanionBuilder = ChatHistoryCompanion
     Function({
   required String id,
   required String firstMessage,
+  Value<DateTime> timestamp,
   Value<int> rowid,
 });
 typedef $$ChatHistoryTableUpdateCompanionBuilder = ChatHistoryCompanion
     Function({
   Value<String> id,
   Value<String> firstMessage,
+  Value<DateTime> timestamp,
   Value<int> rowid,
 });
 
@@ -1108,6 +1148,9 @@ class $$ChatHistoryTableFilterComposer
 
   ColumnFilters<String> get firstMessage => $composableBuilder(
       column: $table.firstMessage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
 }
 
 class $$ChatHistoryTableOrderingComposer
@@ -1125,6 +1168,9 @@ class $$ChatHistoryTableOrderingComposer
   ColumnOrderings<String> get firstMessage => $composableBuilder(
       column: $table.firstMessage,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ChatHistoryTableAnnotationComposer
@@ -1141,6 +1187,9 @@ class $$ChatHistoryTableAnnotationComposer
 
   GeneratedColumn<String> get firstMessage => $composableBuilder(
       column: $table.firstMessage, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
 }
 
 class $$ChatHistoryTableTableManager extends RootTableManager<
@@ -1171,21 +1220,25 @@ class $$ChatHistoryTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> firstMessage = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ChatHistoryCompanion(
             id: id,
             firstMessage: firstMessage,
+            timestamp: timestamp,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
             required String firstMessage,
+            Value<DateTime> timestamp = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ChatHistoryCompanion.insert(
             id: id,
             firstMessage: firstMessage,
+            timestamp: timestamp,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
