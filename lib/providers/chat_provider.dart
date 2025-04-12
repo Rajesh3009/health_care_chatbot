@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database.dart' as db;
+import '../database/database.dart';
 import '../models/message.dart';
 import '../services/gemini_service.dart';
 import 'history_provider.dart';
+import 'database_provider.dart';
 import 'package:uuid/uuid.dart';
 
 // Provider for the GeminiService
@@ -23,18 +24,20 @@ final chatProvider = StateNotifierProvider<ChatNotifier, List<Message>>((ref) {
 
 class ChatNotifier extends StateNotifier<List<Message>> {
   final Ref ref;
-  late final db.AppDatabase _db;
+  late final AppDatabase _db;
 
   ChatNotifier(this.ref) : super([]) {
     _db = ref.read(databaseProvider);
   }
+
+  AppDatabase get database => ref.read(databaseProvider);
 
   void loadChat(String conversationId) async {
     // Set the current conversation ID
     ref.read(currentConversationIdProvider.notifier).state = conversationId;
 
     // Load messages for this conversation
-    final messages = await _db.getMessagesForConversation(conversationId);
+    final messages = await database.getMessagesForConversation(conversationId);
     state = messages;
   }
 
@@ -83,8 +86,8 @@ class ChatNotifier extends StateNotifier<List<Message>> {
       state = [...state, assistantMessage];
 
       // Save messages to database
-      await _db.saveMessage(userMessage, conversationId);
-      await _db.saveMessage(assistantMessage, conversationId);
+      await database.saveMessage(userMessage, conversationId);
+      await database.saveMessage(assistantMessage, conversationId);
 
       // Save to history only if this is a new conversation
       if (state.length <= 2) {
@@ -100,7 +103,7 @@ class ChatNotifier extends StateNotifier<List<Message>> {
 
   Future<void> deleteChat(String conversationId) async {
     // Delete messages
-    await _db.deleteConversation(conversationId);
+    await database.deleteConversation(conversationId);
 
     // Delete history entry
     await ref.read(historyProvider.notifier).deleteHistoryEntry(conversationId);

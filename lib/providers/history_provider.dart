@@ -1,21 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database.dart' as db;
+import '../database/database.dart';
 import '../models/message.dart';
-
-// Provider for the database
-final databaseProvider = Provider<db.AppDatabase>((ref) {
-  return db.AppDatabase();
-});
+import 'database_provider.dart';
 
 // Provider for chat history
 final historyProvider =
-    StateNotifierProvider<HistoryNotifier, List<db.ChatHistoryData>>((ref) {
+    StateNotifierProvider<HistoryNotifier, List<ChatHistoryData>>((ref) {
   return HistoryNotifier(ref);
 });
 
-class HistoryNotifier extends StateNotifier<List<db.ChatHistoryData>> {
+class HistoryNotifier extends StateNotifier<List<ChatHistoryData>> {
   final Ref ref;
-  late final db.AppDatabase _db;
+  late final AppDatabase _db;
 
   HistoryNotifier(this.ref) : super([]) {
     _db = ref.read(databaseProvider);
@@ -34,7 +30,7 @@ class HistoryNotifier extends StateNotifier<List<db.ChatHistoryData>> {
 
     // Save to database
     await _db.saveChatHistory(
-      db.ChatHistoryCompanion.insert(
+      ChatHistoryCompanion.insert(
         id: historyId,
         firstMessage: firstMessage.content,
       ),

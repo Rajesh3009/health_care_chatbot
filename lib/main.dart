@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/chat_screen.dart';
 import 'screens/reminder_screen.dart';
 import 'providers/theme_provider.dart';
+import 'services/notification_service.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().initialize();
   runApp(const ProviderScope(child: MyApp()));
 }
 

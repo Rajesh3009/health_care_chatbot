@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/reminder_provider.dart';
 import '../models/reminder.dart';
 import 'package:uuid/uuid.dart';
+import '../services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ReminderScreen extends ConsumerWidget {
   const ReminderScreen({super.key});
@@ -15,84 +17,97 @@ class ReminderScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Medication Reminders'),
       ),
-      body: ListView.builder(
-        itemCount: reminders.length,
-        itemBuilder: (context, index) {
-          final reminder = reminders[index];
-          return ListTile(
-            title: Text(reminder.medicationName),
-            subtitle: Text(
-              '${reminder.quantity} pills at ${reminder.time.format(context)} - ${_getDaysText(reminder.days)}',
-            ),
-            onTap: () => showDialog(
-              context: context,
-              builder: (context) => Consumer(
-                builder: (context, ref, child) =>
-                    EditReminderDialog(reminder: reminder),
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Switch(
-                  value: reminder.isActive,
-                  onChanged: (value) {
-                    ref
-                        .read(reminderProvider.notifier)
-                        .toggleReminder(reminder.id);
-                  },
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Consumer(
-                          builder: (context, ref, child) =>
-                              EditReminderDialog(reminder: reminder),
-                        ),
-                      );
-                    } else if (value == 'delete') {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Delete Reminder'),
-                          content: const Text(
-                              'Are you sure you want to delete this reminder?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                ref
-                                    .read(reminderProvider.notifier)
-                                    .deleteReminder(reminder.id);
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('Edit'),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              await NotificationService().showTestNotification(context);
+            },
+            child: const Text('Test Notification'),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: reminders.length,
+              itemBuilder: (context, index) {
+                final reminder = reminders[index];
+                return ListTile(
+                  title: Text(reminder.medicationName),
+                  subtitle: Text(
+                    '${reminder.quantity} pills at ${reminder.time.format(context)} - ${_getDaysText(reminder.days)}',
+                  ),
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (context) => Consumer(
+                      builder: (context, ref, child) =>
+                          EditReminderDialog(reminder: reminder),
                     ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Text('Delete'),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Switch(
+                        value: reminder.isActive,
+                        onChanged: (value) {
+                          ref
+                              .read(reminderProvider.notifier)
+                              .toggleReminder(reminder.id, context);
+                        },
+                      ),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Consumer(
+                                builder: (context, ref, child) =>
+                                    EditReminderDialog(reminder: reminder),
+                              ),
+                            );
+                          } else if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete Reminder'),
+                                content: const Text(
+                                    'Are you sure you want to delete this reminder?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(reminderProvider.notifier)
+                                          .deleteReminder(reminder.id);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(
@@ -236,14 +251,14 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                 _selectedDays.isNotEmpty) {
               final uuid = const Uuid();
               ref.read(reminderProvider.notifier).addReminder(
-                    Reminder(
-                      id: uuid.v4(),
-                      medicationName: _medicationController.text,
-                      quantity: int.parse(_quantityController.text),
-                      time: _selectedTime,
-                      days: _selectedDays,
-                    ),
-                  );
+                  Reminder(
+                    id: uuid.v4(),
+                    medicationName: _medicationController.text,
+                    quantity: int.parse(_quantityController.text),
+                    time: _selectedTime,
+                    days: _selectedDays,
+                  ),
+                  context);
               Navigator.of(context).pop();
             }
           },
@@ -362,15 +377,15 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                 _quantityController.text.isNotEmpty &&
                 _selectedDays.isNotEmpty) {
               ref.read(reminderProvider.notifier).updateReminder(
-                    Reminder(
-                      id: widget.reminder.id,
-                      medicationName: _medicationController.text,
-                      quantity: int.parse(_quantityController.text),
-                      time: _selectedTime,
-                      days: _selectedDays,
-                      isActive: widget.reminder.isActive,
-                    ),
-                  );
+                  Reminder(
+                    id: widget.reminder.id,
+                    medicationName: _medicationController.text,
+                    quantity: int.parse(_quantityController.text),
+                    time: _selectedTime,
+                    days: _selectedDays,
+                    isActive: widget.reminder.isActive,
+                  ),
+                  context);
               Navigator.of(context).pop();
             }
           },
