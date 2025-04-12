@@ -24,11 +24,8 @@ final chatProvider = StateNotifierProvider<ChatNotifier, List<Message>>((ref) {
 
 class ChatNotifier extends StateNotifier<List<Message>> {
   final Ref ref;
-  late final AppDatabase _db;
 
-  ChatNotifier(this.ref) : super([]) {
-    _db = ref.read(databaseProvider);
-  }
+  ChatNotifier(this.ref) : super([]) {}
 
   AppDatabase get database => ref.read(databaseProvider);
 

@@ -16,107 +16,171 @@ class ReminderScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medication Reminders'),
+        elevation: 0,
       ),
       body: Column(
         children: [
-          ElevatedButton(
-            onPressed: () async {
-              await NotificationService().showTestNotification(context);
-            },
-            child: const Text('Test Notification'),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.all(16),
+          //   child: ElevatedButton.icon(
+          //     onPressed: () async {
+          //       await NotificationService().showTestNotification(context);
+          //     },
+          //     icon: const Icon(Icons.notifications_active),
+          //     label: const Text('Test Notification'),
+          //     style: ElevatedButton.styleFrom(
+          //       padding:
+          //           const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Expanded(
-            child: ListView.builder(
-              itemCount: reminders.length,
-              itemBuilder: (context, index) {
-                final reminder = reminders[index];
-                return ListTile(
-                  title: Text(reminder.medicationName),
-                  subtitle: Text(
-                    '${reminder.quantity} pills at ${reminder.time.format(context)} - ${_getDaysText(reminder.days)}',
-                  ),
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (context) => Consumer(
-                      builder: (context, ref, child) =>
-                          EditReminderDialog(reminder: reminder),
+            child: reminders.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_off,
+                          size: 64,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No reminders set',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap the + button to add a reminder',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.7),
+                                  ),
+                        ),
+                      ],
                     ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch(
-                        value: reminder.isActive,
-                        onChanged: (value) {
-                          ref
-                              .read(reminderProvider.notifier)
-                              .toggleReminder(reminder.id, context);
-                        },
-                      ),
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            showDialog(
-                              context: context,
-                              builder: (context) => Consumer(
-                                builder: (context, ref, child) =>
-                                    EditReminderDialog(reminder: reminder),
-                              ),
-                            );
-                          } else if (value == 'delete') {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Delete Reminder'),
-                                content: const Text(
-                                    'Are you sure you want to delete this reminder?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      ref
-                                          .read(reminderProvider.notifier)
-                                          .deleteReminder(reminder.id);
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Text('Edit'),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: reminders.length,
+                    itemBuilder: (context, index) {
+                      final reminder = reminders[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          title: Text(
+                            reminder.medicationName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text('Delete'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                '${reminder.quantity} pills at ${reminder.time.format(context)}',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _getDaysText(reminder.days),
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                          onTap: () => showDialog(
+                            context: context,
+                            builder: (context) => Consumer(
+                              builder: (context, ref, child) =>
+                                  EditReminderDialog(reminder: reminder),
+                            ),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: reminder.isActive,
+                                onChanged: (value) {
+                                  ref
+                                      .read(reminderProvider.notifier)
+                                      .toggleReminder(reminder.id, context);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Delete Reminder'),
+                                      content: const Text(
+                                          'Are you sure you want to delete this reminder?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            ref
+                                                .read(reminderProvider.notifier)
+                                                .deleteReminder(reminder.id);
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showDialog(
           context: context,
           builder: (context) => Consumer(
             builder: (context, ref, child) => const AddReminderDialog(),
           ),
         ),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Reminder'),
       ),
     );
   }
