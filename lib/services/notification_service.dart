@@ -27,31 +27,34 @@ class NotificationService {
     await _notifications.initialize(initSettings);
   }
 
-  Future<void> requestPermissions(BuildContext context) async {
-    // Request notification permission
+  Future<bool> requestNotificationPermission() async {
     var status = await Permission.notification.status;
     if (status.isDenied) {
-      await Permission.notification.request();
+      status = await Permission.notification.request();
     }
-
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      // Request exact alarm permission
-      var alarmStatus = await Permission.scheduleExactAlarm.status;
-      if (alarmStatus.isDenied) {
-        await Permission.scheduleExactAlarm.request();
-      }
-    }
+    return status.isGranted;
   }
 
-  Future<void> scheduleReminderNotification(
-      Reminder reminder, BuildContext context) async {
+  Future<bool> requestExactAlarmPermission() async {
+    var status = await Permission.scheduleExactAlarm.status;
+    if (status.isDenied) {
+      status = await Permission.scheduleExactAlarm.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<bool> checkAndRequestPermissions() async {
+    final notificationGranted = await requestNotificationPermission();
+    final exactAlarmGranted = await requestExactAlarmPermission();
+    return notificationGranted && exactAlarmGranted;
+  }
+
+  Future<void> scheduleReminderNotification(Reminder reminder) async {
     try {
       // Check permissions before scheduling
-      if (Theme.of(context).platform == TargetPlatform.android) {
-        var alarmStatus = await Permission.scheduleExactAlarm.status;
-        if (alarmStatus.isDenied) {
-          throw Exception('SCHEDULE_EXACT_ALARM permission denied');
-        }
+      final permissionsGranted = await checkAndRequestPermissions();
+      if (!permissionsGranted) {
+        throw Exception('Required permissions not granted');
       }
 
       const AndroidNotificationDetails androidDetails =
@@ -86,44 +89,8 @@ class NotificationService {
           matchDateTimeComponents: DateTimeComponents.time,
         );
       }
-    } on Exception catch (e) {
-      if (e.toString().contains('SCHEDULE_EXACT_ALARM')) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Permission Required'),
-            content: const Text(
-                'Please grant the SCHEDULE_EXACT_ALARM permission in the app settings to schedule exact alarms.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await Permission.scheduleExactAlarm.request();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Grant Permission'),
-              ),
-            ],
-          ),
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text('Failed to schedule notification: ${e.toString()}'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
+    } on Exception {
+      rethrow;
     }
   }
 
@@ -134,10 +101,9 @@ class NotificationService {
     }
   }
 
-  Future<void> updateReminderNotifications(
-      Reminder reminder, BuildContext context) async {
+  Future<void> updateReminderNotifications(Reminder reminder) async {
     await cancelReminderNotifications(reminder);
-    await scheduleReminderNotification(reminder, context);
+    await scheduleReminderNotification(reminder);
   }
 
   tz.TZDateTime _getNextScheduledDate(DateTime now, int day, TimeOfDay time) {
@@ -160,7 +126,7 @@ class NotificationService {
         scheduledDate.add(Duration(days: daysToAdd)), tz.local);
   }
 
-  Future<void> showTestNotification(BuildContext context) async {
+  Future<void> showTestNotification() async {
     await initialize();
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(

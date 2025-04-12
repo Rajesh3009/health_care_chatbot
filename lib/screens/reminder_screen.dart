@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/reminder_provider.dart';
 import '../models/reminder.dart';
 import 'package:uuid/uuid.dart';
-import '../services/notification_service.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ReminderScreen extends ConsumerWidget {
   const ReminderScreen({super.key});
@@ -37,6 +35,7 @@ class ReminderScreen extends ConsumerWidget {
           //     ),
           //   ),
           // ),
+          const SizedBox(height: 8),
           Expanded(
             child: reminders.isEmpty
                 ? Center(
@@ -49,7 +48,7 @@ class ReminderScreen extends ConsumerWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .primary
-                              .withOpacity(0.5),
+                              .withAlpha(128),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -64,7 +63,7 @@ class ReminderScreen extends ConsumerWidget {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(0.7),
+                                        .withAlpha(179),
                                   ),
                         ),
                       ],
@@ -83,7 +82,9 @@ class ReminderScreen extends ConsumerWidget {
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           title: Text(
                             reminder.medicationName,
                             style: const TextStyle(
@@ -101,7 +102,7 @@ class ReminderScreen extends ConsumerWidget {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withOpacity(0.7),
+                                      .withAlpha(179),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -111,7 +112,7 @@ class ReminderScreen extends ConsumerWidget {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withOpacity(0.7),
+                                      .withAlpha(179),
                                 ),
                               ),
                             ],
@@ -131,7 +132,7 @@ class ReminderScreen extends ConsumerWidget {
                                 onChanged: (value) {
                                   ref
                                       .read(reminderProvider.notifier)
-                                      .toggleReminder(reminder.id, context);
+                                      .toggleReminder(reminder.id);
                                 },
                               ),
                               IconButton(
@@ -142,7 +143,8 @@ class ReminderScreen extends ConsumerWidget {
                                     builder: (context) => AlertDialog(
                                       title: const Text('Delete Reminder'),
                                       content: const Text(
-                                          'Are you sure you want to delete this reminder?'),
+                                        'Are you sure you want to delete this reminder?',
+                                      ),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
@@ -314,15 +316,13 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                 _quantityController.text.isNotEmpty &&
                 _selectedDays.isNotEmpty) {
               final uuid = const Uuid();
-              ref.read(reminderProvider.notifier).addReminder(
-                  Reminder(
+              ref.read(reminderProvider.notifier).addReminder(Reminder(
                     id: uuid.v4(),
                     medicationName: _medicationController.text,
                     quantity: int.parse(_quantityController.text),
                     time: _selectedTime,
                     days: _selectedDays,
-                  ),
-                  context);
+                  ));
               Navigator.of(context).pop();
             }
           },
@@ -440,16 +440,14 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
             if (_medicationController.text.isNotEmpty &&
                 _quantityController.text.isNotEmpty &&
                 _selectedDays.isNotEmpty) {
-              ref.read(reminderProvider.notifier).updateReminder(
-                  Reminder(
+              ref.read(reminderProvider.notifier).updateReminder(Reminder(
                     id: widget.reminder.id,
                     medicationName: _medicationController.text,
                     quantity: int.parse(_quantityController.text),
                     time: _selectedTime,
                     days: _selectedDays,
                     isActive: widget.reminder.isActive,
-                  ),
-                  context);
+                  ));
               Navigator.of(context).pop();
             }
           },

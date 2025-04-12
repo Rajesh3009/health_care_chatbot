@@ -30,7 +30,7 @@ class ChatBubble extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: !isUser
-              ? Border.all(color: ThemeColors.primaryGreen.withOpacity(0.3))
+              ? Border.all(color: ThemeColors.primaryGreen.withAlpha(77))
               : null,
         ),
         child: isUser
@@ -49,13 +49,13 @@ class ChatBubble extends StatelessWidget {
                         color: textColor,
                       ),
                   code: TextStyle(
-                    backgroundColor: ThemeColors.lightGreen.withOpacity(0.3),
+                    backgroundColor: ThemeColors.lightGreen.withAlpha(77),
                     fontFamily: 'monospace',
                     fontSize: 14,
                     color: ThemeColors.darkGreen,
                   ),
                   codeblockDecoration: BoxDecoration(
-                    color: ThemeColors.lightGreen.withOpacity(0.3),
+                    color: ThemeColors.lightGreen.withAlpha(77),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
