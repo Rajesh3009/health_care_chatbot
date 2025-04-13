@@ -86,7 +86,8 @@ class NotificationService {
           scheduledDate,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
+          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+          payload: reminder.id,
         );
       }
     } on Exception {
