@@ -136,7 +136,7 @@ class ReminderScreen extends ConsumerWidget {
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.more_vert),
+                                icon: const Icon(Icons.delete),
                                 onPressed: () {
                                   showDialog(
                                     context: context,
