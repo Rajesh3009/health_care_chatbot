@@ -14,7 +14,7 @@ class GeminiService {
   Future<String> getHealthResponse(String prompt) async {
     // Add healthcare context to the prompt
     final enhancedPrompt =
-        'As a healthcare assistant, please provide accurate information about: $prompt ,include Medication if possible, include some references and just give the answer.';
+        'As a healthcare assistant, please provide accurate information about: $prompt ,include Medication if possible, include some references , just give the answer and if someone greet you just say hi and ask how can i help you today.';
 
     try {
       final response = await _generativeModel.generateContent([

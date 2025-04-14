@@ -1,7 +1,7 @@
-name: health_care_chatbot
-description: "A healthcare chatbot using Gemini AI."
+name: healthcare_assistant
+description: "A Healthcare Assistant using Gemini AI."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1+2
 
 environment:
   sdk: ^3.6.1

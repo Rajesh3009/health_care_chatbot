@@ -20,7 +20,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Healthcare Chatbot',
+      title: 'Healthcare Assistant',
       theme: theme,
       home: const MainScreen(),
     );

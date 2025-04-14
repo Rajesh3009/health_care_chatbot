@@ -1,6 +1,6 @@
 {
-     "name": "Healthcare Chatbot",
-     "short_name": "Healthcare Chatbot",
+     "name": "Healthcare Assistant",
+     "short_name": "Healthcare Assistant",
      "start_url": ".",
      "display": "standalone",
      "background_color": "#0175C2",
