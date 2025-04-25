@@ -5,8 +5,13 @@ import '../database/database.dart';
 
 class HistoryItem extends ConsumerWidget {
   final ChatHistoryData historyItem;
+  final VoidCallback? onTap;
 
-  const HistoryItem({super.key, required this.historyItem});
+  const HistoryItem({
+    super.key,
+    required this.historyItem,
+    this.onTap,
+  });
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year.toString().substring(2)}';
@@ -30,6 +35,7 @@ class HistoryItem extends ConsumerWidget {
         ),
         onTap: () {
           ref.read(chatProvider.notifier).loadChat(historyItem.id);
+          onTap?.call();
         },
         trailing: IconButton(
           icon: const Icon(Icons.delete),

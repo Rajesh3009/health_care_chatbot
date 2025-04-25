@@ -1,7 +1,7 @@
 name: healthcare_assistant
 description: "A Healthcare Assistant using Gemini AI."
 publish_to: 'none'
-version: 0.1.1+2
+version: 0.1.2+3
 
 environment:
   sdk: ^3.6.1
@@ -36,6 +36,7 @@ dependencies:
   timezone: ^0.10.0
   permission_handler: ^11.3.0
   rename_app: ^1.6.2
+  flutter_tts: ^3.8.5
 
 dev_dependencies:
   flutter_test:

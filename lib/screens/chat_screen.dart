@@ -2,22 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_bubble.dart';
-import '../providers/history_provider.dart'; // Import history provider
-import '../widgets/history_item.dart'; // Import history item
+import '../providers/history_provider.dart';
+import '../widgets/history_item.dart';
 import '../models/message.dart';
 import 'package:uuid/uuid.dart';
 import '../widgets/typing_indicator.dart';
 import 'theme_screen.dart';
 
-class ChatScreen extends ConsumerWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  final TextEditingController _textController = TextEditingController();
+
+  void _sendMessage() {
+    if (_textController.text.trim().isNotEmpty) {
+      final uuid = const Uuid();
+      ref.read(chatProvider.notifier).sendMessage(_textController.text, uuid.v4());
+      _textController.clear();
+      FocusScope.of(context).unfocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
-    final history = ref.watch(historyProvider); // Watch history provider
+    final history = ref.watch(historyProvider);
     final isLoading = ref.watch(isLoadingProvider);
-    final textController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +73,6 @@ class ChatScreen extends ConsumerWidget {
                   "History",
                   style: TextStyle(
                     fontSize: 24,
-                    
                   ),
                 ),
               ),
@@ -60,8 +80,10 @@ class ChatScreen extends ConsumerWidget {
               Expanded(
                 child: ListView(
                   children: history
-                      .map((historyItem) =>
-                          HistoryItem(historyItem: historyItem))
+                      .map((historyItem) => HistoryItem(
+                            historyItem: historyItem,
+                            onTap: () => Navigator.pop(context),
+                          ))
                       .toList(),
                 ),
               ),
@@ -97,36 +119,18 @@ class ChatScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: textController,
-                    enabled: !isLoading, // Disable input while loading
+                    controller: _textController,
+                    enabled: !isLoading,
                     decoration: const InputDecoration(
                       hintText: 'Type your message...',
                       border: OutlineInputBorder(),
                     ),
-                    onSubmitted: (text) {
-                      if (text.trim().isNotEmpty) {
-                        final uuid = const Uuid();
-                        ref
-                            .read(chatProvider.notifier)
-                            .sendMessage(text, uuid.v4());
-                        textController.clear();
-                      }
-                    },
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.send),
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          if (textController.text.trim().isNotEmpty) {
-                            final uuid = const Uuid();
-                            ref
-                                .read(chatProvider.notifier)
-                                .sendMessage(textController.text, uuid.v4());
-                            textController.clear();
-                          }
-                        },
+                  onPressed: isLoading ? null : _sendMessage,
                 ),
               ],
             ),
